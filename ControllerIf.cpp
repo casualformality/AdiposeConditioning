@@ -18,7 +18,7 @@ ControllerIf::ControllerIf() {
     max_iterations = 2;
     max_shake_time = 20;
     max_flush_cycles = 1;
-    max_shaker_delay = 40;
+    max_shaker_delay = 10;
     max_shaker_angle = 45;
     max_settle_time = 30;
     max_fill_delay = 40;
@@ -118,7 +118,7 @@ void        ControllerIf::pump() {
 void        ControllerIf::shake() {
   if(prv_shake_angle != cur_shake_angle) {
       prv_shake_angle = cur_shake_angle;
-      shake_servo.write(cur_shake_angle);
+      shake_servo.writeMicroseconds((int) (cur_shake_angle/0.09));
   }
 }
 

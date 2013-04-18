@@ -1,6 +1,7 @@
 #include "LiveNode.h"
 #include <glcd.h>
 #include "ControllerIf.h"
+#include "Arduino.h"
 
         LiveNode::LiveNode(ControllerIf *ctrl, DisplayNode *parent) 
             : DisplayNode(ctrl, "Start", parent, 0) {
@@ -71,9 +72,9 @@ void LiveNode::updateDisplay() {
     GLCD.CursorTo(0, 4);
     GLCD.print(valueStr);
 
-    GLCD.CursorTo(120, 1);
+    GLCD.CursorTo(20, 1);
     GLCD.print("^");
-    GLCD.CursorTo(120, 5);
+    GLCD.CursorTo(20, 5);
     GLCD.print("`");
     GLCD.CursorTo(0, 7);
     GLCD.print("                 Stop");

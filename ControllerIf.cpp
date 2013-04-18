@@ -3,8 +3,10 @@
 #include "SettingsNode.h"
 #include "LiveNode.h"
 #include "ErrorNode.h"
+#include "Arduino.h"
 
 #include <glcd.h>
+#include <Serial.h>
 
 boolean debug_state;
 
@@ -19,7 +21,7 @@ ControllerIf::ControllerIf() {
     max_shake_time = 20;
     max_flush_cycles = 1;
     max_shaker_delay = 10;
-    max_shaker_angle = 45;
+    max_shaker_angle = 50;
     max_settle_time = 30;
     max_fill_delay = 40;
     max_fill_weight = 20;
@@ -50,7 +52,7 @@ ControllerIf::ControllerIf() {
     devSettings->addChild(node);
     node = new SettingsNode(this, "Shaker Speed", devSettings, "MS Wait", &max_shaker_delay, 0, 1000);
     devSettings->addChild(node);
-    node = new SettingsNode(this, "Shaker Angle", devSettings, "Degrees from Horizon", &max_shaker_angle, 0, 50);
+    node = new SettingsNode(this, "Shaker Angle", devSettings, "Degrees from Horizon / 0.09", &max_shaker_angle, 0, 50);
     devSettings->addChild(node);
     node = new SettingsNode(this, "Settle Time", devSettings, "Seconds", &max_settle_time, 0, 300);
     devSettings->addChild(node);
@@ -63,7 +65,6 @@ ControllerIf::ControllerIf() {
 void        ControllerIf::start() {
     rootNode->updateDisplay();
     
-    cur_state = MENU_STATE;
     isFlushCycle = false;
     curFlush = 0;
     curIters = 0;
@@ -79,7 +80,6 @@ void        ControllerIf::start() {
     valve_2_servo.attach(VALVE_2_PIN);
     pinMode(PUMP_DIR_PIN, OUTPUT);
     pinMode(PUMP_STEP_PIN, OUTPUT);
-    pinMode(DETECTOR_PIN, OUTPUT);
     pinMode(PUMP_EN_PIN, OUTPUT);
     pinMode(DEBUG_PIN, OUTPUT);
     
@@ -87,6 +87,12 @@ void        ControllerIf::start() {
     valve_2_servo.write(VALVE_2_CLOSED);
     digitalWrite(PUMP_DIR_PIN, HIGH);
     digitalWrite(PUMP_EN_PIN, LOW);
+    
+    if(DEBUG_TIME > 0) {
+      select(liveNode);
+    } else {
+      cur_state = MENU_STATE;
+    }
 }
 
 int        ControllerIf::getDetectorVal() {
@@ -118,7 +124,7 @@ void        ControllerIf::pump() {
 void        ControllerIf::shake() {
   if(prv_shake_angle != cur_shake_angle) {
       prv_shake_angle = cur_shake_angle;
-      shake_servo.writeMicroseconds((int) (cur_shake_angle/0.09));
+      shake_servo.write(cur_shake_angle);
   }
 }
 
@@ -179,7 +185,6 @@ void        ControllerIf::select(DisplayNode *node) {
 
     if(currentNode != NULL) {
         currentNode->updateDisplay();
-        //GLCD.update();
     }
 }
 
@@ -192,56 +197,48 @@ void        ControllerIf::getUserInput() {
         if(!buttonUpState) {
             buttonUpState = true;
             getCurrentNode()->buttonUp();
-            GLCD.InvertRect(119, 7, 125, 12);
-            //GLCD.update();
+            GLCD.InvertRect(119, 7, 6, 7);
         }
     } else {
         if(buttonUpState) {
             buttonUpState = false;
             getCurrentNode()->updateDisplay();
-            //GLCD.update();
         }
     }
     if(digitalRead(BUTTON_DN_PIN) == 0) {
         if(!buttonDnState) {
             buttonDnState = true;
             getCurrentNode()->buttonDn();
-            GLCD.InvertRect(119, 41, 125, 46);
-            //GLCD.update();
+            GLCD.InvertRect(119, 38, 6, 7);
         }
     } else {
         if(buttonDnState) {
             buttonDnState = false;
             getCurrentNode()->updateDisplay();
-            //GLCD.update();
         }
     }
     if(digitalRead(BUTTON_LT_PIN) == 0) {
         if(!buttonLtState) {
             buttonLtState = true;
             getCurrentNode()->buttonLt();
-            GLCD.InvertRect(0, 63, 63, 55);
-            //GLCD.update();
+            GLCD.InvertRect(0, 56, 63, 7);
         }
     } else {
         if(buttonLtState) {
             buttonLtState = false;
             getCurrentNode()->updateDisplay();
-            //GLCD.update();
         }
     }
     if(digitalRead(BUTTON_RT_PIN) == 0) {
         if(!buttonRtState) {
             buttonRtState = true;
             getCurrentNode()->buttonRt();
-            GLCD.InvertRect(64, 63, 127, 55);
-            //GLCD.update();
+            GLCD.InvertRect(64, 56, 63, 7);
         }
     } else {
         if(buttonRtState) {
             buttonRtState = false;
             getCurrentNode()->updateDisplay();
-            //GLCD.update();
         }
     }
     
@@ -250,7 +247,6 @@ void        ControllerIf::getUserInput() {
         if(current_time >= last_update + update_interval) {
             last_update = current_time;
             getCurrentNode()->updateDisplay();
-            //GLCD.update();
         }
     }
 }
@@ -284,9 +280,6 @@ void ControllerIf::updateState() {
             cur_fill_weight = 0;
             cur_shake_angle = FILL_ANGLE;
             nxt_state = FILL_HYP;
-            if(DEBUG_TIME > 0) {
-                digitalWrite(DEBUG_PIN, HIGH);
-            }
         break;
         case FILL_HYP:
             if(current_time < state_start_time + STATE_WAIT_TIME) {
@@ -308,6 +301,7 @@ void ControllerIf::updateState() {
                         nxt_state = SHAKE_HYP;
                     }
                 } else {
+                    Serial.println("Switching to SHAKE_HYP");
                     nxt_state = SHAKE_HYP;
                 }
             }
@@ -337,6 +331,7 @@ void ControllerIf::updateState() {
                     shake();
                 }
             } else {
+                Serial.println("Switching to SETTLE_HYP");
                 cur_shake_angle = SETTLE_ANGLE;
                 shake();
                 nxt_state = SETTLE_HYP;
@@ -346,6 +341,7 @@ void ControllerIf::updateState() {
             if(current_time < state_start_time + (max_settle_time * 1000)) {
                 // No-op
             } else {
+                Serial.println("Switching to DRAIN_HYP");
                 nxt_state = DRAIN_HYP;
                 cur_shake_angle = SETTLE_ANGLE;
                 shake();
@@ -361,9 +357,11 @@ void ControllerIf::updateState() {
                 /* No-op */
             } else {
                 if(isFlushCycle) {
+                    Serial.println("Switching to FILL_HYP");
                     cur_shake_angle = FILL_ANGLE;
                     nxt_state = FILL_HYP;
                 } else {
+                    Serial.println("Switching to FILL_NORM");
                     cur_shake_angle = FILL_ANGLE;
                     nxt_state = FILL_NORM;
                 }
@@ -380,6 +378,7 @@ void ControllerIf::updateState() {
                 /* No-op */
                 pump();
             } else {
+                Serial.println("Switching to SHAKE_NORM");
                 nxt_state = SHAKE_NORM;
             }
         break;
@@ -408,6 +407,7 @@ void ControllerIf::updateState() {
                     shake();
                 }
             } else {
+                Serial.println("Switching to SETTLE_NORM");
                 cur_shake_angle = SETTLE_ANGLE;
                 shake();
                 nxt_state = SETTLE_NORM;
@@ -417,6 +417,7 @@ void ControllerIf::updateState() {
             if(current_time < state_start_time + (max_settle_time * 1000)) {
                 // No-op
             } else {
+                Serial.println("Switching to DRAIN_NORM");
                 nxt_state = DRAIN_NORM;
             }
         break;
@@ -434,9 +435,11 @@ void ControllerIf::updateState() {
                 if(curIters < max_iterations) {
                     isFlushCycle = true;
                     curIters++;
+                    Serial.println("Switching to FILL_HYP");
                     cur_shake_angle = FILL_ANGLE;
                     nxt_state = FILL_HYP;
                 } else {
+                    Serial.println("Switching to DONE");
                     cur_shake_angle = SETTLE_ANGLE;
                     nxt_state = DONE;
                 }

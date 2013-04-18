@@ -1,6 +1,7 @@
 #include "ErrorNode.h"
 #include <glcd.h>
 #include "ControllerIf.h"
+#include "Arduino.h"
 
         ErrorNode::ErrorNode(ControllerIf *ctrl) 
             : DisplayNode(ctrl, "", NULL, 0) {

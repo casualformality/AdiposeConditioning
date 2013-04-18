@@ -3,10 +3,12 @@
 #include <Servo.h>
 #include "ControllerIf.h"
 #include "DisplayNode.h"
+#include <Serial.h>
 
 ControllerIf *ctrl;
 
 void setup() {
+    Serial.begin(9600);
     pinMode(BUTTON_UP_PIN, INPUT);
     pinMode(BUTTON_DN_PIN, INPUT);
     pinMode(BUTTON_LT_PIN, INPUT);

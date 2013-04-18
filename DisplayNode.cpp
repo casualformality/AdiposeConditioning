@@ -1,5 +1,6 @@
 #include "DisplayNode.h"
 #include "ControllerIf.h"
+#include "Arduino.h"
 #include <stdlib.h>
 
 DisplayNode::DisplayNode(ControllerIf *ctrl, const char *title, DisplayNode *parent, int numChildren) {

@@ -2,6 +2,7 @@
 #define ERROR_NODE
 
 #include "DisplayNode.h"
+#include "Arduino.h"
 
 class ErrorNode : public DisplayNode {
 public:

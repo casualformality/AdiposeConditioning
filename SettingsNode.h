@@ -2,6 +2,7 @@
 #define SETTINGS_NODE
 
 #include "DisplayNode.h"
+#include "Arduino.h"
 
 class SettingsNode : public DisplayNode {
 public:

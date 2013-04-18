@@ -1,6 +1,7 @@
 #include "SettingsNode.h"
 #include <glcd.h>
 #include "ControllerIf.h"
+#include "Arduino.h"
 
     SettingsNode::SettingsNode(ControllerIf *ctrl, const char *title, 
         DisplayNode *parent, const char *units, int *value, 
@@ -50,12 +51,12 @@ void SettingsNode::updateDisplay() {
     GLCD.CursorTo(0, 0);
     GLCD.print(this->toString());
     GLCD.CursorTo(0, 2);
-    GLCD.print(tempValue);
+    GLCD.print(valueStr);
     GLCD.CursorTo(0, 3);
     GLCD.print(units);
-    GLCD.CursorTo(120, 1);
+    GLCD.CursorTo(20, 1);
     GLCD.print("^");
-    GLCD.CursorTo(120, 5);
+    GLCD.CursorTo(20, 5);
     GLCD.print("`");
     GLCD.CursorTo(0, 7);
     GLCD.print("Set              Back");

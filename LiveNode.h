@@ -2,6 +2,7 @@
 #define LIVE_NODE
 
 #include "DisplayNode.h"
+#include "Arduino.h"
 
 #define CW  true
 #define CCW false

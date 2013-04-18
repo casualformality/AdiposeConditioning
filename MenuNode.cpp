@@ -1,6 +1,7 @@
 #include "MenuNode.h"
 #include <glcd.h>
 #include "ControllerIf.h"
+#include "Arduino.h"
 
         MenuNode::MenuNode(ControllerIf *ctrl, const char *title, DisplayNode *parent, 
         int numChildren) : DisplayNode(ctrl, title, parent, numChildren) {
@@ -11,18 +12,17 @@
 void    MenuNode::selectItem(int index) {
     selectedItem = index;
     if(index <= viewIndex + MAX_INDEX && index >= viewIndex) {
-        GLCD.InvertRect(0, (selectedItem - viewIndex) * 8, 117, (selectedItem - viewIndex + 1) * 8 - 1);
+        GLCD.InvertRect(0, (selectedItem - viewIndex) * 8, 117, 7);
     }
-    //GLCD.update();
 }
 
 void MenuNode::updateDisplay() {
     int i = 0;
 
     GLCD.ClearScreen();
-    GLCD.CursorTo(120, 1);
+    GLCD.CursorTo(20, 1);
     GLCD.print("^");
-    GLCD.CursorTo(120, 5);
+    GLCD.CursorTo(20, 5);
     GLCD.print("`");
     GLCD.CursorTo(0, 7);
     GLCD.print("Select           Back");

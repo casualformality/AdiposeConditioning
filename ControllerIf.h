@@ -2,6 +2,7 @@
 #define CONTROLLER_IF_H
 
 #include <Servo.h>
+#include "Arduino.h"
 
 class DisplayNode;
 class LiveNode;
@@ -15,13 +16,13 @@ class ErrorNode;
 #define VALVE_2_PIN 5
 #define SHAKE_PIN 3
 #define WEIGHT_PIN 3
-#define SETTLE_ANGLE 135
-#define FILL_ANGLE 42
+#define SETTLE_ANGLE 5
+#define FILL_ANGLE 50
 #define CENTER_ANGLE 50
 #define DETECTOR_PIN 0
-#define PUMP_DIR_PIN 83
-#define PUMP_STEP_PIN 82
-#define PUMP_EN_PIN 84
+#define PUMP_DIR_PIN 10
+#define PUMP_STEP_PIN 9
+#define PUMP_EN_PIN 8
 #define STATE_WAIT_TIME 2000
 
 #define VALVE_1_CLOSED  45
@@ -31,8 +32,8 @@ class ErrorNode;
 #define VALVE_2_ADIPOSE 0
 #define VALVE_2_WASTE   170
 
-#define DEBUG_TIME 15
-#define DEBUG_PIN 52
+#define DEBUG_TIME 0
+#define DEBUG_PIN 13
 
 enum DeviceState {
     MENU_STATE,

@@ -2,6 +2,7 @@
 #define MENU_NODE
 
 #include "DisplayNode.h"
+#include "Arduino.h"
 
 class MenuNode : public DisplayNode {
 public:

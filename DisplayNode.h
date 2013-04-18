@@ -1,5 +1,6 @@
 #ifndef DISPLAY_NODE_H
 #define DISPLAY_NODE_H
+#include "Arduino.h"
 
 class ControllerIf;
 

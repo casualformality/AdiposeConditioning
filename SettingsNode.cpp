@@ -45,7 +45,7 @@ void SettingsNode::buttonRt() {
 }
 
 void SettingsNode::updateDisplay() {
-    sprintf(valueStr, "%.4d", tempValue);
+    sprintf(valueStr, "%.4d                 ", tempValue);
 
     GLCD.ClearScreen();
     GLCD.CursorTo(0, 0);
@@ -54,10 +54,10 @@ void SettingsNode::updateDisplay() {
     GLCD.print(valueStr);
     GLCD.CursorTo(0, 3);
     GLCD.print(units);
-    GLCD.CursorTo(20, 1);
-    GLCD.print("^");
-    GLCD.CursorTo(20, 5);
-    GLCD.print("`");
+    //GLCD.CursorTo(20, 1);
+    //GLCD.print("^");
+    //GLCD.CursorTo(20, 5);
+    //GLCD.print("`");
     GLCD.CursorTo(0, 7);
     GLCD.print("Set              Back");
 }

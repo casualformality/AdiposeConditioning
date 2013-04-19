@@ -4,7 +4,7 @@
 #include "Arduino.h"
 
         LiveNode::LiveNode(ControllerIf *ctrl, DisplayNode *parent) 
-            : DisplayNode(ctrl, "Start", parent, 0) {
+            : DisplayNode(ctrl, "Start                ", parent, 0) {
     start_time = 0;
     cur_time = 0;
 }
@@ -17,47 +17,47 @@ void LiveNode::updateDisplay() {
     GLCD.CursorTo(0, 0);
     switch(ctrl->getDeviceState()) {
         case MENU_STATE:
-            GLCD.print("Starting...");
+            GLCD.print("Starting...          ");
         case FILL_HYP:
-            GLCD.print("Filling Hypoxic Sln.");
+            GLCD.print("Filling Hypoxic Sln. ");
             GLCD.CursorTo(0, 2);
-            sprintf(buffer, "%d", ctrl->getCurWeight());
+            sprintf(buffer, "%.3d                  ", ctrl->getCurWeight());
             GLCD.print(buffer);
         break;
         case SHAKE_HYP:
-            GLCD.print("Shaking Hypoxic Sln.");
+            GLCD.print("Shaking Hypoxic Sln. ");
         break;
         case SETTLE_HYP:
-            GLCD.print("Hypoxic Settling");
+            GLCD.print("Hypoxic Settling     ");
         break;
         case DRAIN_HYP:
-            GLCD.print("Hypoxic Draining");
+            GLCD.print("Hypoxic Draining     ");
             GLCD.CursorTo(0, 2);
-            sprintf(buffer, "%d", ctrl->getCurWeight());
+            sprintf(buffer, "%.3d                  ", ctrl->getCurWeight());
             GLCD.print(buffer);
             GLCD.CursorTo(0, 3);
-            sprintf(buffer, "%d", ctrl->getDetectorVal());
+            sprintf(buffer, "%.3d                  ", ctrl->getDetectorVal());
             GLCD.print(buffer);
         break;
         case FILL_NORM:
             GLCD.print("Filling Normoxic Sln.");
             GLCD.CursorTo(0, 2);
-            sprintf(buffer, "%d", ctrl->getCurWeight());
+            sprintf(buffer, "%.3d                 ", ctrl->getCurWeight());
             GLCD.print(buffer);
         break;
         case SHAKE_NORM:
             GLCD.print("Shaking Normoxic Sln.");
         break;
         case SETTLE_NORM:
-            GLCD.print("Normoxic Settling");
+            GLCD.print("Normoxic Settling    ");
         break;
         case DRAIN_NORM:
-            GLCD.print("Normoxic Draining");
+            GLCD.print("Normoxic Draining    ");
             GLCD.CursorTo(0, 2);
-            sprintf(buffer, "Weight: %d", ctrl->getCurWeight());
+            sprintf(buffer, "Weight: %.3d          ", ctrl->getCurWeight());
             GLCD.print(buffer);
-            GLCD.CursorTo(0, 3);
-            sprintf(buffer, "Fat Detector: %d", ctrl->getDetectorVal());
+            GLCD.CursorTo(0, 4);
+            sprintf(buffer, "Fat Detector: %.3d    ", ctrl->getDetectorVal());
             GLCD.print(buffer);
         break;
         default:
@@ -66,16 +66,16 @@ void LiveNode::updateDisplay() {
         break;
     }
 
-    sprintf(valueStr, "%.4d", (cur_time - start_time)/1000);
+    sprintf(valueStr, "%.4d                 ", (cur_time - start_time)/1000);
 
     
     GLCD.CursorTo(0, 4);
     GLCD.print(valueStr);
 
-    GLCD.CursorTo(20, 1);
-    GLCD.print("^");
-    GLCD.CursorTo(20, 5);
-    GLCD.print("`");
+    //GLCD.CursorTo(20, 1);
+    //GLCD.print("^");
+    //GLCD.CursorTo(20, 5);
+    //GLCD.print("`");
     GLCD.CursorTo(0, 7);
     GLCD.print("                 Stop");
 }

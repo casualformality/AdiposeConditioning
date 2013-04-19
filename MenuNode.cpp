@@ -20,10 +20,10 @@ void MenuNode::updateDisplay() {
     int i = 0;
 
     GLCD.ClearScreen();
-    GLCD.CursorTo(20, 1);
-    GLCD.print("^");
-    GLCD.CursorTo(20, 5);
-    GLCD.print("`");
+    //GLCD.CursorTo(20, 1);
+    //GLCD.print("^");
+    //GLCD.CursorTo(20, 5);
+    //GLCD.print("`");
     GLCD.CursorTo(0, 7);
     GLCD.print("Select           Back");
     

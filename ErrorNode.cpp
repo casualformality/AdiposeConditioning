@@ -5,7 +5,7 @@
 
         ErrorNode::ErrorNode(ControllerIf *ctrl) 
             : DisplayNode(ctrl, "", NULL, 0) {
-    errorMessage = "Undefined Error";
+    errorMessage = "Undefined Error      ";
 }
 
 void ErrorNode::buttonUp() {

@@ -16,8 +16,8 @@ class ErrorNode;
 #define VALVE_2_PIN 5
 #define SHAKE_PIN 3
 #define WEIGHT_PIN 3
-#define SETTLE_ANGLE 5
-#define FILL_ANGLE 50
+#define SETTLE_ANGLE 140
+#define FILL_ANGLE 100
 #define CENTER_ANGLE 50
 #define DETECTOR_PIN 0
 #define PUMP_DIR_PIN 10
@@ -27,10 +27,10 @@ class ErrorNode;
 
 #define VALVE_1_CLOSED  45
 #define VALVE_1_HYP     0
-#define VALVE_1_NORM    170
+#define VALVE_1_NORM    180
 #define VALVE_2_CLOSED  45
 #define VALVE_2_ADIPOSE 0
-#define VALVE_2_WASTE   170
+#define VALVE_2_WASTE   180
 
 #define DEBUG_TIME 0
 #define DEBUG_PIN 13
@@ -116,7 +116,7 @@ private:
     int         max_shaker_angle;
     int         max_settle_time;
     int         max_drain_time;
-    int         max_fill_delay;
+    int         fill_speed;
     int         set_fill_weight;
     int         max_fill_weight;
     int         detector_threshold;

@@ -23,41 +23,49 @@ ControllerIf::ControllerIf() {
     max_shaker_delay = 10;
     max_shaker_angle = 50;
     max_settle_time = 30;
-    max_fill_delay = 40;
+    fill_speed = 100;
     max_fill_weight = 20;
     detector_threshold = 300;
     max_check_delay = 500;
     cur_fill_weight = 0;
 
     errorNode = new ErrorNode(this);
-    rootNode = new MenuNode(this, "Welcome!", NULL, 3);
+    rootNode = new MenuNode(this, "Welcome!             ", NULL, 3);
     
     liveNode = new LiveNode(this, rootNode);
     rootNode->addChild(liveNode);
     
-    DisplayNode *runSettings = new MenuNode(this, "Run Settings", rootNode, 4);
+    DisplayNode *runSettings = new MenuNode(this, "Run Settings         ", rootNode, 4);
     rootNode->addChild(runSettings);
-    DisplayNode *node = new SettingsNode(this, "Cycle Count", runSettings, "", &max_iterations, 0, 100);
+    DisplayNode *node = new SettingsNode(this, "Cycle Count          ", runSettings, "                     ", &max_iterations, 0, 100);
     runSettings->addChild(node);
-    node = new SettingsNode(this, "Shake Time", runSettings, "Seconds", &max_shake_time, 0, 300);
+    node = new SettingsNode(this, "Shake Time           ", runSettings, "Seconds              ", &max_shake_time, 0, 300);
     runSettings->addChild(node);
-    node = new SettingsNode(this, "Fill Volume", runSettings, "Grams", &max_fill_weight, 0, 100);
+    node = new SettingsNode(this, "Fill Volume          ", runSettings, "Grams                ", &max_fill_weight, 0, 100);
     runSettings->addChild(node);
-    node = new SettingsNode(this, "Flush Cycles", runSettings, "", &max_flush_cycles, 0, 10);
+    node = new SettingsNode(this, "Flush Cycles         ", runSettings, "                     ", &max_flush_cycles, 0, 10);
     runSettings->addChild(node);
     
-    DisplayNode *devSettings = new MenuNode(this, "Device Settings", rootNode, 8);
+    DisplayNode *devSettings = new MenuNode(this, "Device Settings      ", rootNode, 8);
     rootNode->addChild(devSettings);
-    node = new SettingsNode(this, "Pump Speed", devSettings, "% of Full Speed", &max_fill_delay, 0, 1000);
+    node = new SettingsNode(this, "Pump Speed          ", devSettings, "% of Full Speed       ", &fill_speed, 0, 100);
     devSettings->addChild(node);
-    node = new SettingsNode(this, "Shaker Speed", devSettings, "MS Wait", &max_shaker_delay, 0, 1000);
+    node = new SettingsNode(this, "Shaker Speed        ", devSettings, "MS Wait               ", &max_shaker_delay, 0, 1000);
     devSettings->addChild(node);
-    node = new SettingsNode(this, "Shaker Angle", devSettings, "Degrees from Horizon / 0.09", &max_shaker_angle, 0, 50);
+    node = new SettingsNode(this, "Shaker Angle        ", devSettings, "Degrees from Horizon  ", &max_shaker_angle, 0, 50);
     devSettings->addChild(node);
-    node = new SettingsNode(this, "Settle Time", devSettings, "Seconds", &max_settle_time, 0, 300);
+    node = new SettingsNode(this, "Settle Time         ", devSettings, "Seconds               ", &max_settle_time, 0, 300);
     devSettings->addChild(node);
-    node = new SettingsNode(this, "Detector Threshold", devSettings, "0-1024", &detector_threshold, 0, 1024);
+    node = new SettingsNode(this, "Detector Threshold  ", devSettings, "0-1024                ", &detector_threshold, 0, 1024);
     devSettings->addChild(node);
+
+    shake_servo.attach(SHAKE_PIN);
+    valve_1_servo.attach(VALVE_1_PIN);
+    valve_2_servo.attach(VALVE_2_PIN);
+    pinMode(PUMP_DIR_PIN, OUTPUT);
+    pinMode(PUMP_STEP_PIN, OUTPUT);
+    pinMode(PUMP_EN_PIN, OUTPUT);
+    pinMode(DEBUG_PIN, OUTPUT);
 
     select(rootNode);
 }
@@ -75,14 +83,6 @@ void        ControllerIf::start() {
     cur_shake_angle = 5;
     prv_shake_angle = -1;
 
-    shake_servo.attach(SHAKE_PIN);
-    valve_1_servo.attach(VALVE_1_PIN);
-    valve_2_servo.attach(VALVE_2_PIN);
-    pinMode(PUMP_DIR_PIN, OUTPUT);
-    pinMode(PUMP_STEP_PIN, OUTPUT);
-    pinMode(PUMP_EN_PIN, OUTPUT);
-    pinMode(DEBUG_PIN, OUTPUT);
-    
     valve_1_servo.write(VALVE_1_CLOSED);
     valve_2_servo.write(VALVE_2_CLOSED);
     digitalWrite(PUMP_DIR_PIN, HIGH);
@@ -108,8 +108,8 @@ bool        ControllerIf::readDetector() {
 }
 
 void        ControllerIf::pump() {
-  int steps = 1/0.225;
-  float usDelay = (1.0 / (max_fill_delay / 100.0)) * 70.0;
+  int steps = 360.0 / 0.225;
+  float usDelay = (1 / (fill_speed / 100.0)) * 70.0;
   
   for(int i = 0; i < steps; i++) {
       digitalWrite(PUMP_STEP_PIN, HIGH);
@@ -118,7 +118,6 @@ void        ControllerIf::pump() {
       digitalWrite(PUMP_STEP_PIN, LOW);
       delayMicroseconds(usDelay);
   }
-  
 }
 
 void        ControllerIf::shake() {
@@ -288,7 +287,6 @@ void ControllerIf::updateState() {
                     (current_time < state_start_time + DEBUG_TIME + STATE_WAIT_TIME)) {
                 pump();
             } else if(DEBUG_TIME == 0 && (cur_fill_weight < max_fill_weight)) {
-                /* No-op */
                 pump();
             } else {
                 if(isFlushCycle) {
@@ -309,7 +307,7 @@ void ControllerIf::updateState() {
         case SHAKE_HYP:
             if(current_time < state_start_time + STATE_WAIT_TIME) {
               // No-op
-            } else if(current_time < state_start_time + (max_shake_time * 1000) + STATE_WAIT_TIME) {
+            } else if(current_time < (state_start_time + (max_shake_time * 1000) + STATE_WAIT_TIME)) {
                 if(cur_shake_angle == SETTLE_ANGLE) {
                     shaker_direction = true;
                     cur_shake_angle = CENTER_ANGLE - max_shaker_angle;
@@ -385,7 +383,7 @@ void ControllerIf::updateState() {
         case SHAKE_NORM:
             if(current_time < state_start_time + STATE_WAIT_TIME) {
               // No-op
-            } else if(current_time < state_start_time + (max_shake_time * 1000) + STATE_WAIT_TIME) {
+            } else if(current_time < (state_start_time + (max_shake_time * 1000) + STATE_WAIT_TIME)) {
                 if(cur_shake_angle == SETTLE_ANGLE) {
                     shaker_direction = true;
                     cur_shake_angle = CENTER_ANGLE - max_shaker_angle;

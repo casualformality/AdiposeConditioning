@@ -8,6 +8,8 @@
 ControllerIf *ctrl;
 
 void setup() {
+    delay(500);
+  
     Serial.begin(9600);
     pinMode(BUTTON_UP_PIN, INPUT);
     pinMode(BUTTON_DN_PIN, INPUT);

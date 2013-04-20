@@ -26,8 +26,8 @@ class ErrorNode;
 #define STATE_WAIT_TIME 2000
 
 #define VALVE_1_CLOSED  45
-#define VALVE_1_HYP     0
-#define VALVE_1_NORM    180
+#define VALVE_1_HYP     180
+#define VALVE_1_NORM    0
 #define VALVE_2_CLOSED  45
 #define VALVE_2_ADIPOSE 0
 #define VALVE_2_WASTE   180

@@ -17,8 +17,8 @@ public:
     virtual void    updateDisplay();
     void            start();
 private:
-    int   start_time;
-    int   cur_time;
+    unsigned long   start_time;
+    unsigned long   cur_time;
     char  valueStr[15];
     char  buffer[12];
 };

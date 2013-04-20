@@ -7,17 +7,17 @@
 class SettingsNode : public DisplayNode {
 public:
         SettingsNode(ControllerIf*, const char*, 
-            DisplayNode*, const char*, int*, int, int);
+            DisplayNode*, const char*, unsigned long*, unsigned long, unsigned long);
     virtual void    buttonUp();
     virtual void    buttonDn();
     virtual void    buttonLt();
     virtual void    buttonRt();
     virtual void    updateDisplay();
 private:
-    int     tempValue;
-    int     *valuePtr;
-    int     max_value;
-    int     min_value;
+    unsigned long     tempValue;
+    unsigned long     *valuePtr;
+    unsigned long     max_value;
+    unsigned long     min_value;
     char    valueStr[15];
     const char    *units;
 };

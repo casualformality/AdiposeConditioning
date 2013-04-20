@@ -21,7 +21,7 @@ void LiveNode::updateDisplay() {
         case FILL_HYP:
             GLCD.print("Filling Hypoxic Sln. ");
             GLCD.CursorTo(0, 2);
-            sprintf(buffer, "%.3d                  ", ctrl->getCurWeight());
+            sprintf(buffer, "%.3lu                  ", ctrl->getCurWeight());
             GLCD.print(buffer);
         break;
         case SHAKE_HYP:
@@ -33,16 +33,16 @@ void LiveNode::updateDisplay() {
         case DRAIN_HYP:
             GLCD.print("Hypoxic Draining     ");
             GLCD.CursorTo(0, 2);
-            sprintf(buffer, "%.3d                  ", ctrl->getCurWeight());
+            sprintf(buffer, "%.3lu                  ", ctrl->getCurWeight());
             GLCD.print(buffer);
             GLCD.CursorTo(0, 3);
-            sprintf(buffer, "%.3d                  ", ctrl->getDetectorVal());
+            sprintf(buffer, "%.3lu                  ", ctrl->getDetectorVal());
             GLCD.print(buffer);
         break;
         case FILL_NORM:
             GLCD.print("Filling Normoxic Sln.");
             GLCD.CursorTo(0, 2);
-            sprintf(buffer, "%.3d                 ", ctrl->getCurWeight());
+            sprintf(buffer, "%.3lu                 ", ctrl->getCurWeight());
             GLCD.print(buffer);
         break;
         case SHAKE_NORM:
@@ -54,10 +54,10 @@ void LiveNode::updateDisplay() {
         case DRAIN_NORM:
             GLCD.print("Normoxic Draining    ");
             GLCD.CursorTo(0, 2);
-            sprintf(buffer, "Weight: %.3d          ", ctrl->getCurWeight());
+            sprintf(buffer, "Weight: %.3lu          ", ctrl->getCurWeight());
             GLCD.print(buffer);
             GLCD.CursorTo(0, 4);
-            sprintf(buffer, "Fat Detector: %.3d    ", ctrl->getDetectorVal());
+            sprintf(buffer, "Fat Detector: %.3lu    ", ctrl->getDetectorVal());
             GLCD.print(buffer);
         break;
         default:

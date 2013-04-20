@@ -4,12 +4,12 @@
 #include "Arduino.h"
 
         MenuNode::MenuNode(ControllerIf *ctrl, const char *title, DisplayNode *parent, 
-        int numChildren) : DisplayNode(ctrl, title, parent, numChildren) {
+        unsigned long numChildren) : DisplayNode(ctrl, title, parent, numChildren) {
     selectedItem = 0;
     viewIndex = 0;
 }
 
-void    MenuNode::selectItem(int index) {
+void    MenuNode::selectItem(unsigned long index) {
     selectedItem = index;
     if(index <= viewIndex + MAX_INDEX && index >= viewIndex) {
         GLCD.InvertRect(0, (selectedItem - viewIndex) * 8, 117, 7);
@@ -17,7 +17,7 @@ void    MenuNode::selectItem(int index) {
 }
 
 void MenuNode::updateDisplay() {
-    int i = 0;
+    unsigned long i = 0;
 
     GLCD.ClearScreen();
     //GLCD.CursorTo(20, 1);
@@ -27,7 +27,7 @@ void MenuNode::updateDisplay() {
     GLCD.CursorTo(0, 7);
     GLCD.print("Select           Back");
     
-    for(int index = viewIndex; index < viewIndex + MAX_INDEX + 1 && index < getNumChildren(); index++) {
+    for(unsigned long index = viewIndex; index < viewIndex + MAX_INDEX + 1 && index < getNumChildren(); index++) {
         GLCD.CursorTo(0, i);
         DisplayNode *child = getChildAt(index);
         if(child != NULL) {

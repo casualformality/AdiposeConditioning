@@ -3,7 +3,7 @@
 #include "Arduino.h"
 #include <stdlib.h>
 
-DisplayNode::DisplayNode(ControllerIf *ctrl, const char *title, DisplayNode *parent, int numChildren) {
+DisplayNode::DisplayNode(ControllerIf *ctrl, const char *title, DisplayNode *parent, unsigned long numChildren) {
     this->title = title;
     this->parent = parent;
     this->numChildren = numChildren;
@@ -41,7 +41,7 @@ void        DisplayNode::addChild(DisplayNode* node) {
         return;
     }
 
-    int index = 0;
+    unsigned long index = 0;
 
     if(childCount < numChildren) {
         index = childCount;
@@ -53,11 +53,11 @@ void        DisplayNode::addChild(DisplayNode* node) {
     children[index] = node;
 }
 
-int         DisplayNode::getNumChildren() {
+unsigned long         DisplayNode::getNumChildren() {
     return childCount;
 }
 
-DisplayNode *DisplayNode::getChildAt(int index) {
+DisplayNode *DisplayNode::getChildAt(unsigned long index) {
     if(children != NULL && index >= 0 && index < childCount) {
         return children[index];
     } else {

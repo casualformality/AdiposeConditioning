@@ -6,17 +6,17 @@
 
 class MenuNode : public DisplayNode {
 public:
-            MenuNode(ControllerIf*, const char*, DisplayNode*, int);
+            MenuNode(ControllerIf*, const char*, DisplayNode*, unsigned long);
     virtual void    buttonUp();
     virtual void    buttonDn();
     virtual void    buttonLt();
     virtual void    buttonRt();
     virtual void    updateDisplay();
 private:
-    void    selectItem(int);
+    void    selectItem(unsigned long);
 
-    int     selectedItem;
-    int     viewIndex;
+    unsigned long     selectedItem;
+    unsigned long     viewIndex;
 };
 
 #endif

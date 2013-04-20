@@ -95,7 +95,7 @@ void        ControllerIf::start() {
     }
 }
 
-int        ControllerIf::getDetectorVal() {
+unsigned long        ControllerIf::getDetectorVal() {
     return analogRead(DETECTOR_PIN);
 }
 
@@ -108,10 +108,10 @@ bool        ControllerIf::readDetector() {
 }
 
 void        ControllerIf::pump() {
-  int steps = 360.0 / 0.225;
+  unsigned long steps = 360.0 / 0.225;
   float usDelay = (1 / (fill_speed / 100.0)) * 70.0;
   
-  for(int i = 0; i < steps; i++) {
+  for(unsigned long i = 0; i < steps; i++) {
       digitalWrite(PUMP_STEP_PIN, HIGH);
       delayMicroseconds(usDelay); 
 
@@ -242,7 +242,7 @@ void        ControllerIf::getUserInput() {
     }
     
     if(currentNode == liveNode) {
-        int current_time = millis();
+        unsigned long current_time = millis();
         if(current_time >= last_update + update_interval) {
             last_update = current_time;
             getCurrentNode()->updateDisplay();
@@ -254,8 +254,8 @@ DeviceState ControllerIf::getDeviceState() {
     return cur_state;
 }
 
-int ControllerIf::getWeight() {
-    int tmp = analogRead(WEIGHT_PIN);
+unsigned long ControllerIf::getWeight() {
+    unsigned long tmp = analogRead(WEIGHT_PIN);
     tmp = (tmp - set_fill_weight) * 1.2;
     if(tmp >= 0) {
         cur_fill_weight = (cur_fill_weight * 0.85) + (tmp * 0.15);
@@ -263,7 +263,7 @@ int ControllerIf::getWeight() {
     return cur_fill_weight;
 }
 
-int ControllerIf::getCurWeight() {
+unsigned long ControllerIf::getCurWeight() {
     return cur_fill_weight;
 }
 
@@ -281,10 +281,10 @@ void ControllerIf::updateState() {
             nxt_state = FILL_HYP;
         break;
         case FILL_HYP:
-            if(current_time < state_start_time + STATE_WAIT_TIME) {
+            if(current_time < (state_start_time + STATE_WAIT_TIME)) {
               // No-op
             } else if((DEBUG_TIME != 0) && 
-                    (current_time < state_start_time + DEBUG_TIME + STATE_WAIT_TIME)) {
+                    (current_time < (state_start_time + DEBUG_TIME + STATE_WAIT_TIME))) {
                 pump();
             } else if(DEBUG_TIME == 0 && (cur_fill_weight < max_fill_weight)) {
                 pump();
@@ -305,7 +305,7 @@ void ControllerIf::updateState() {
             }
         break;
         case SHAKE_HYP:
-            if(current_time < state_start_time + STATE_WAIT_TIME) {
+            if(current_time < (state_start_time + STATE_WAIT_TIME)) {
               // No-op
             } else if(current_time < (state_start_time + (max_shake_time * 1000) + STATE_WAIT_TIME)) {
                 if(cur_shake_angle == SETTLE_ANGLE) {
@@ -317,12 +317,12 @@ void ControllerIf::updateState() {
                     cur_state_delay += max_shaker_delay;
                     if(shaker_direction) {
                         cur_shake_angle++;
-                        if(cur_shake_angle >= CENTER_ANGLE + max_shaker_angle) {
+                        if(cur_shake_angle >= (CENTER_ANGLE + max_shaker_angle)) {
                             shaker_direction = false;
                         }
                     } else {
                         cur_shake_angle--;
-                        if(cur_shake_angle <= CENTER_ANGLE - max_shaker_angle) {
+                        if(cur_shake_angle <= (CENTER_ANGLE - max_shaker_angle)) {
                             shaker_direction = true;
                         }
                     }
@@ -336,7 +336,7 @@ void ControllerIf::updateState() {
             }
         break;
         case SETTLE_HYP:
-            if(current_time < state_start_time + (max_settle_time * 1000)) {
+            if(current_time < (state_start_time + (max_settle_time * 1000))) {
                 // No-op
             } else {
                 Serial.println("Switching to DRAIN_HYP");
@@ -346,12 +346,12 @@ void ControllerIf::updateState() {
             }
         break;
         case DRAIN_HYP:
-            if(DEBUG_TIME != 0 && (current_time <= state_start_time + DEBUG_TIME)) {
+            if(DEBUG_TIME != 0 && (current_time <= (state_start_time + DEBUG_TIME))) {
                 /* No-op */
             } else if(!readDetector() &&
                     (cur_fill_weight > 1) &&
                     (DEBUG_TIME == 0) &&
-                    (current_time < state_start_time + 12000)) {
+                    (current_time < (state_start_time + 12000))) {
                 /* No-op */
             } else {
                 if(isFlushCycle) {
@@ -367,12 +367,12 @@ void ControllerIf::updateState() {
             }
         break;
         case FILL_NORM:
-            if(current_time < state_start_time + STATE_WAIT_TIME) {
+            if(current_time < (state_start_time + STATE_WAIT_TIME)) {
               // No-op
-            } else if(DEBUG_TIME != 0 &&
-                    (current_time < state_start_time + DEBUG_TIME + STATE_WAIT_TIME)) {
+            } else if((DEBUG_TIME != 0) &&
+                    (current_time < (state_start_time + DEBUG_TIME + STATE_WAIT_TIME))) {
                     pump();
-            } else if(DEBUG_TIME == 0 && (cur_fill_weight < max_fill_weight)) {
+            } else if((DEBUG_TIME == 0) && (cur_fill_weight < max_fill_weight)) {
                 /* No-op */
                 pump();
             } else {
@@ -381,7 +381,7 @@ void ControllerIf::updateState() {
             }
         break;
         case SHAKE_NORM:
-            if(current_time < state_start_time + STATE_WAIT_TIME) {
+            if(current_time < (state_start_time + STATE_WAIT_TIME)) {
               // No-op
             } else if(current_time < (state_start_time + (max_shake_time * 1000) + STATE_WAIT_TIME)) {
                 if(cur_shake_angle == SETTLE_ANGLE) {
@@ -412,7 +412,7 @@ void ControllerIf::updateState() {
             }
         break;
         case SETTLE_NORM:
-            if(current_time < state_start_time + (max_settle_time * 1000)) {
+            if(current_time < (state_start_time + (max_settle_time * 1000))) {
                 // No-op
             } else {
                 Serial.println("Switching to DRAIN_NORM");
@@ -420,14 +420,14 @@ void ControllerIf::updateState() {
             }
         break;
         case DRAIN_NORM:
-            if(current_time < state_start_time + STATE_WAIT_TIME) {
+            if(current_time < (state_start_time + STATE_WAIT_TIME)) {
               // No-op
-            } else if(DEBUG_TIME != 0 && (current_time <= state_start_time + DEBUG_TIME)) {
+            } else if((DEBUG_TIME != 0) && (current_time <= state_start_time + DEBUG_TIME)) {
                 /* No-op */
             } else if(!readDetector() &&
                     (cur_fill_weight > 1) &&
                     (DEBUG_TIME == 0) &&
-                    (current_time < state_start_time + 12000)) {
+                    (current_time < (state_start_time + 12000))) {
                 /* No-op */
             } else {
                 if(curIters < max_iterations) {
@@ -460,7 +460,7 @@ void ControllerIf::updateState() {
         state_start_time = millis();
         cur_check_delay = state_start_time;
         cur_state_delay = state_start_time;
-        if(cur_state == FILL_HYP || cur_state == FILL_NORM) {
+        if((cur_state == FILL_HYP) || (cur_state == FILL_NORM)) {
             digitalWrite(PUMP_EN_PIN, HIGH);
         } else {
             digitalWrite(PUMP_EN_PIN, LOW);

@@ -64,9 +64,9 @@ public:
     void        getUserInput();
     void        updateState();
     DeviceState getDeviceState();
-    int         getWeight();
-    int         getCurWeight();
-    int         getDetectorVal();
+    unsigned long         getWeight();
+    unsigned long         getCurWeight();
+    unsigned long         getDetectorVal();
 private:
     DisplayNode *currentNode;
     DisplayNode *rootNode;
@@ -78,8 +78,8 @@ private:
     bool        readDetector();
     void        updateValvePosition();
     
-    int         update_interval;
-    int         last_update;
+    unsigned long         update_interval;
+    unsigned long         last_update;
     
     bool        buttonUpState;
     bool        buttonDnState;
@@ -88,38 +88,38 @@ private:
     
     DeviceState cur_state;
     DeviceState nxt_state;
-    int         cur_shake_angle;
-    int         prv_shake_angle;
+    unsigned long         cur_shake_angle;
+    unsigned long         prv_shake_angle;
     bool        shaker_direction;
     bool        isFlushCycle;
-    int         curFlush;
+    unsigned long         curFlush;
     ValvePos    valve_state;
-    int         curIters;
+    unsigned long         curIters;
     
-    int         current_time;
-    int         state_start_time;
-    int         cur_state_delay;
-    int         cur_check_delay;
-    int         max_check_delay;
-    int         cur_fill_weight;
+    unsigned long         current_time;
+    unsigned long         state_start_time;
+    unsigned long         cur_state_delay;
+    unsigned long         cur_check_delay;
+    unsigned long         max_check_delay;
+    unsigned long         cur_fill_weight;
     
     Servo       shake_servo;
     Servo       valve_1_servo;
     Servo       valve_2_servo;
     
-    int         start_time;
-    int         max_iterations;
-    int         max_shake_time;
-    int         max_flush_cycles;
+    unsigned long         start_time;
+    unsigned long         max_iterations;
+    unsigned long         max_shake_time;
+    unsigned long         max_flush_cycles;
     
-    int         max_shaker_delay;
-    int         max_shaker_angle;
-    int         max_settle_time;
-    int         max_drain_time;
-    int         fill_speed;
-    int         set_fill_weight;
-    int         max_fill_weight;
-    int         detector_threshold;
+    unsigned long         max_shaker_delay;
+    unsigned long         max_shaker_angle;
+    unsigned long         max_settle_time;
+    unsigned long         max_drain_time;
+    unsigned long         fill_speed;
+    unsigned long         set_fill_weight;
+    unsigned long         max_fill_weight;
+    unsigned long         detector_threshold;
 };
 
 #endif

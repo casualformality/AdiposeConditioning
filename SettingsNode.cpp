@@ -4,8 +4,8 @@
 #include "Arduino.h"
 
     SettingsNode::SettingsNode(ControllerIf *ctrl, const char *title, 
-        DisplayNode *parent, const char *units, int *value, 
-        int min_value = 0, int max_value = 1024) 
+        DisplayNode *parent, const char *units, unsigned long *value, 
+        unsigned long min_value = 0, unsigned long max_value = 1024) 
             : DisplayNode(ctrl, title, parent, 0) {
     if(units != NULL) {
         this->units = units;
@@ -45,7 +45,7 @@ void SettingsNode::buttonRt() {
 }
 
 void SettingsNode::updateDisplay() {
-    sprintf(valueStr, "%.4d                 ", tempValue);
+    sprintf(valueStr, "%.4lu                 ", tempValue);
 
     GLCD.ClearScreen();
     GLCD.CursorTo(0, 0);

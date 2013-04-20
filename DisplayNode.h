@@ -8,14 +8,14 @@ class ControllerIf;
 
 class DisplayNode {
 public:
-                    DisplayNode(ControllerIf*, const char*, DisplayNode*, int);
+                    DisplayNode(ControllerIf*, const char*, DisplayNode*, unsigned long);
     virtual         ~DisplayNode();
     const char      *toString();
     DisplayNode     *getParent();
     void            setParent(DisplayNode*);
     void            addChild(DisplayNode*);
-    int             getNumChildren();
-    DisplayNode     *getChildAt(int);
+    unsigned long             getNumChildren();
+    DisplayNode     *getChildAt(unsigned long);
     virtual void    buttonUp();
     virtual void    buttonDn();
     virtual void    buttonLt();
@@ -25,8 +25,8 @@ protected:
     ControllerIf    *ctrl;
     const char      *title;
     DisplayNode     *parent;
-    int             numChildren;
-    int             childCount;
+    unsigned long             numChildren;
+    unsigned long             childCount;
     DisplayNode     **children;
 };
 

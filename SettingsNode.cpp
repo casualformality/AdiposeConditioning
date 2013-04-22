@@ -54,10 +54,10 @@ void SettingsNode::updateDisplay() {
     GLCD.print(valueStr);
     GLCD.CursorTo(0, 3);
     GLCD.print(units);
-    //GLCD.CursorTo(20, 1);
-    //GLCD.print("^");
-    //GLCD.CursorTo(20, 5);
-    //GLCD.print("`");
+    GLCD.CursorTo(20, 1);
+    GLCD.print("^");
+    GLCD.CursorTo(20, 5);
+    GLCD.print("`");
     GLCD.CursorTo(0, 7);
     GLCD.print("Set              Back");
 }

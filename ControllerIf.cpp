@@ -30,33 +30,33 @@ ControllerIf::ControllerIf() {
     cur_fill_weight = 0;
 
     errorNode = new ErrorNode(this);
-    rootNode = new MenuNode(this, "Welcome!             ", NULL, 3);
+    rootNode = new MenuNode(this, "Welcome!", NULL, 3);
     
     liveNode = new LiveNode(this, rootNode);
     rootNode->addChild(liveNode);
     
-    DisplayNode *runSettings = new MenuNode(this, "Run Settings         ", rootNode, 4);
+    DisplayNode *runSettings = new MenuNode(this, "Run Settings", rootNode, 4);
     rootNode->addChild(runSettings);
-    DisplayNode *node = new SettingsNode(this, "Cycle Count          ", runSettings, "                     ", &max_iterations, 0, 100);
+    DisplayNode *node = new SettingsNode(this, "Cycle Count", runSettings, "", &max_iterations, 0, 100);
     runSettings->addChild(node);
-    node = new SettingsNode(this, "Shake Time           ", runSettings, "Seconds              ", &max_shake_time, 0, 300);
+    node = new SettingsNode(this, "Shake Time", runSettings, "Seconds", &max_shake_time, 0, 300);
     runSettings->addChild(node);
-    node = new SettingsNode(this, "Fill Volume          ", runSettings, "Grams                ", &max_fill_weight, 0, 100);
+    node = new SettingsNode(this, "Fill Volume", runSettings, "Grams", &max_fill_weight, 0, 100);
     runSettings->addChild(node);
-    node = new SettingsNode(this, "Flush Cycles         ", runSettings, "                     ", &max_flush_cycles, 0, 10);
+    node = new SettingsNode(this, "Flush Cycles", runSettings, "", &max_flush_cycles, 0, 10);
     runSettings->addChild(node);
     
-    DisplayNode *devSettings = new MenuNode(this, "Device Settings      ", rootNode, 8);
+    DisplayNode *devSettings = new MenuNode(this, "Device Settings", rootNode, 8);
     rootNode->addChild(devSettings);
-    node = new SettingsNode(this, "Pump Speed          ", devSettings, "% of Full Speed       ", &fill_speed, 0, 100);
+    node = new SettingsNode(this, "Pump Speed", devSettings, "% of Full Speed", &fill_speed, 0, 100);
     devSettings->addChild(node);
-    node = new SettingsNode(this, "Shaker Speed        ", devSettings, "MS Wait               ", &max_shaker_delay, 0, 1000);
+    node = new SettingsNode(this, "Shaker Speed", devSettings, "MS Wait", &max_shaker_delay, 0, 1000);
     devSettings->addChild(node);
-    node = new SettingsNode(this, "Shaker Angle        ", devSettings, "Degrees from Horizon  ", &max_shaker_angle, 0, 50);
+    node = new SettingsNode(this, "Shaker Angle", devSettings, "Degrees from Horizon", &max_shaker_angle, 0, 50);
     devSettings->addChild(node);
-    node = new SettingsNode(this, "Settle Time         ", devSettings, "Seconds               ", &max_settle_time, 0, 300);
+    node = new SettingsNode(this, "Settle Time", devSettings, "Seconds", &max_settle_time, 0, 300);
     devSettings->addChild(node);
-    node = new SettingsNode(this, "Detector Threshold  ", devSettings, "0-1024                ", &detector_threshold, 0, 1024);
+    node = new SettingsNode(this, "Detector Threshold", devSettings, "0-1024", &detector_threshold, 0, 1024);
     devSettings->addChild(node);
 
     shake_servo.attach(SHAKE_PIN);
@@ -268,34 +268,48 @@ unsigned long ControllerIf::getCurWeight() {
 }
 
 void ControllerIf::updateState() {
+    // Don't do anything if we're not in a running state
     if(currentNode != liveNode) {
         return;
     }
     
+    // Each state needs some lead-in delay time for servo movement, etc.
     current_time = millis();
+    if(current_time < (state_start_time + STATE_WAIT_TIME)) {
+        return;
+    }
+    
+    // Check weight at a regular interval
+    if(current_time > cur_check_delay) {
+        cur_check_delay += max_check_delay;
+        getWeight();
+    }
+    
     switch(cur_state) {
         case MENU_STATE:
             set_fill_weight = analogRead(WEIGHT_PIN);
             cur_fill_weight = 0;
             cur_shake_angle = FILL_ANGLE;
             nxt_state = FILL_HYP;
+            Serial.println("Switching to FILL_HYP");
         break;
         case FILL_HYP:
-            if(current_time < (state_start_time + STATE_WAIT_TIME)) {
-              // No-op
-            } else if((DEBUG_TIME != 0) && 
-                    (current_time < (state_start_time + DEBUG_TIME + STATE_WAIT_TIME))) {
+            if((DEBUG_TIME != 0) 
+                    && (current_time < (state_start_time + DEBUG_TIME + STATE_WAIT_TIME))) {
                 pump();
-            } else if(DEBUG_TIME == 0 && (cur_fill_weight < max_fill_weight)) {
+            } else if(DEBUG_TIME == 0 
+                    && (cur_fill_weight < max_fill_weight)) {
                 pump();
             } else {
                 if(isFlushCycle) {
                     if(curFlush < max_flush_cycles) {
                         curFlush++;
+                        Serial.println("Switching to DRAIN_HYP");
                         nxt_state = DRAIN_HYP;
                     } else {
                         isFlushCycle = false;
                         curFlush = 0;
+                        Serial.println("Switching to SHAKE_HYP");
                         nxt_state = SHAKE_HYP;
                     }
                 } else {
@@ -305,9 +319,7 @@ void ControllerIf::updateState() {
             }
         break;
         case SHAKE_HYP:
-            if(current_time < (state_start_time + STATE_WAIT_TIME)) {
-              // No-op
-            } else if(current_time < (state_start_time + (max_shake_time * 1000) + STATE_WAIT_TIME)) {
+            if(current_time < (state_start_time + (max_shake_time * 1000) + STATE_WAIT_TIME)) {
                 if(cur_shake_angle == SETTLE_ANGLE) {
                     shaker_direction = true;
                     cur_shake_angle = CENTER_ANGLE - max_shaker_angle;
@@ -336,43 +348,42 @@ void ControllerIf::updateState() {
             }
         break;
         case SETTLE_HYP:
-            if(current_time < (state_start_time + (max_settle_time * 1000))) {
+            if(current_time < (state_start_time + (max_settle_time * 1000) + STATE_WAIT_TIME)) {
                 // No-op
             } else {
                 Serial.println("Switching to DRAIN_HYP");
                 nxt_state = DRAIN_HYP;
-                cur_shake_angle = SETTLE_ANGLE;
-                shake();
             }
         break;
         case DRAIN_HYP:
-            if(DEBUG_TIME != 0 && (current_time <= (state_start_time + DEBUG_TIME))) {
+            if(DEBUG_TIME != 0 
+                    && (current_time <= (state_start_time + DEBUG_TIME + STATE_WAIT_TIME))
+                    && (!readDetector())) {
                 /* No-op */
-            } else if(!readDetector() &&
-                    (cur_fill_weight > 1) &&
-                    (DEBUG_TIME == 0) &&
-                    (current_time < (state_start_time + 12000))) {
+            } else if(!readDetector() 
+                    && (cur_fill_weight > 1) 
+                    && (DEBUG_TIME == 0) 
+                    // Set a max drain time
+                    && (current_time < (state_start_time + 12000))) {
                 /* No-op */
             } else {
                 if(isFlushCycle) {
                     Serial.println("Switching to FILL_HYP");
-                    cur_shake_angle = FILL_ANGLE;
                     nxt_state = FILL_HYP;
                 } else {
                     Serial.println("Switching to FILL_NORM");
-                    cur_shake_angle = FILL_ANGLE;
                     nxt_state = FILL_NORM;
                 }
+                cur_shake_angle = FILL_ANGLE;
                 shake();
             }
         break;
         case FILL_NORM:
-            if(current_time < (state_start_time + STATE_WAIT_TIME)) {
-              // No-op
-            } else if((DEBUG_TIME != 0) &&
-                    (current_time < (state_start_time + DEBUG_TIME + STATE_WAIT_TIME))) {
+            if((DEBUG_TIME != 0) 
+                    && (current_time < (state_start_time + DEBUG_TIME + STATE_WAIT_TIME))) {
                     pump();
-            } else if((DEBUG_TIME == 0) && (cur_fill_weight < max_fill_weight)) {
+            } else if((DEBUG_TIME == 0) 
+                    && (cur_fill_weight < max_fill_weight)) {
                 /* No-op */
                 pump();
             } else {
@@ -381,9 +392,7 @@ void ControllerIf::updateState() {
             }
         break;
         case SHAKE_NORM:
-            if(current_time < (state_start_time + STATE_WAIT_TIME)) {
-              // No-op
-            } else if(current_time < (state_start_time + (max_shake_time * 1000) + STATE_WAIT_TIME)) {
+            if(current_time < (state_start_time + (max_shake_time * 1000) + STATE_WAIT_TIME)) {
                 if(cur_shake_angle == SETTLE_ANGLE) {
                     shaker_direction = true;
                     cur_shake_angle = CENTER_ANGLE - max_shaker_angle;
@@ -420,14 +429,15 @@ void ControllerIf::updateState() {
             }
         break;
         case DRAIN_NORM:
-            if(current_time < (state_start_time + STATE_WAIT_TIME)) {
-              // No-op
-            } else if((DEBUG_TIME != 0) && (current_time <= state_start_time + DEBUG_TIME)) {
-                /* No-op */
-            } else if(!readDetector() &&
-                    (cur_fill_weight > 1) &&
-                    (DEBUG_TIME == 0) &&
-                    (current_time < (state_start_time + 12000))) {
+            if(DEBUG_TIME != 0 
+                    && (current_time <= (state_start_time + DEBUG_TIME + STATE_WAIT_TIME))
+                    && (!readDetector())) {
+            /* No-op */
+            } else if(!readDetector() 
+                    && (cur_fill_weight > 1) 
+                    && (DEBUG_TIME == 0) 
+                    // Set a max drain time
+                    && (current_time < (state_start_time + 12000))) {
                 /* No-op */
             } else {
                 if(curIters < max_iterations) {
@@ -447,11 +457,6 @@ void ControllerIf::updateState() {
         case DONE:
             // No-op
         break;
-    }
-
-    if(current_time > cur_check_delay) {
-        cur_check_delay += max_check_delay;
-        getWeight();
     }
 
     if(cur_state != nxt_state) {

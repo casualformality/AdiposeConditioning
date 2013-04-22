@@ -32,7 +32,7 @@ class ErrorNode;
 #define VALVE_2_ADIPOSE 0
 #define VALVE_2_WASTE   180
 
-#define DEBUG_TIME 0
+#define DEBUG_TIME 10000
 #define DEBUG_PIN 13
 
 enum DeviceState {

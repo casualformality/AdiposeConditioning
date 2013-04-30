@@ -25,7 +25,7 @@ ControllerIf::ControllerIf() {
     max_settle_time = 30;
     fill_speed = 100;
     max_fill_weight = 20;
-    detector_threshold = 300;
+    detector_threshold = 180;
     max_check_delay = 500;
     cur_fill_weight = 0;
 
@@ -85,7 +85,7 @@ void        ControllerIf::start() {
 
     valve_1_servo.write(VALVE_1_CLOSED);
     valve_2_servo.write(VALVE_2_CLOSED);
-    digitalWrite(PUMP_DIR_PIN, HIGH);
+    digitalWrite(PUMP_DIR_PIN, LOW);
     digitalWrite(PUMP_EN_PIN, LOW);
     
     if(DEBUG_TIME > 0) {
@@ -100,7 +100,7 @@ unsigned long        ControllerIf::getDetectorVal() {
 }
 
 bool        ControllerIf::readDetector() {
-    if(analogRead(DETECTOR_PIN) < detector_threshold) {
+    if(analogRead(DETECTOR_PIN) > detector_threshold) {
         return true;
     } else {
         return false;
@@ -139,6 +139,13 @@ void        ControllerIf::updateValvePosition() {
                 valve_state = CLOSED;
                 valve_1_servo.write(VALVE_1_CLOSED);
                 valve_2_servo.write(VALVE_2_CLOSED);
+            }
+            break;
+        case FLUSH_SLN:
+            if(valve_state != FLUSH) {
+                valve_state = FLUSH;
+                valve_1_servo.write(VALVE_1_HYP);
+                valve_2_servo.write(VALVE_2_FLUSH);
             }
             break;
         case FILL_HYP:
@@ -292,6 +299,14 @@ void ControllerIf::updateState() {
             cur_shake_angle = FILL_ANGLE;
             nxt_state = FILL_HYP;
             Serial.println("Switching to FILL_HYP");
+        break;
+        case FLUSH_SLN:
+            if(current_time < (state_start_time + 5000 + STATE_WAIT_TIME)) {
+                pump();
+            } else {
+                nxt_state = FILL_HYP;
+                Serial.println("Switching to FILL_HYP");
+            }
         break;
         case FILL_HYP:
             if((DEBUG_TIME != 0) 
@@ -465,7 +480,7 @@ void ControllerIf::updateState() {
         state_start_time = millis();
         cur_check_delay = state_start_time;
         cur_state_delay = state_start_time;
-        if((cur_state == FILL_HYP) || (cur_state == FILL_NORM)) {
+        if((cur_state == FILL_HYP) || (cur_state == FILL_NORM) || (cur_state == FLUSH_SLN)) {
             digitalWrite(PUMP_EN_PIN, HIGH);
         } else {
             digitalWrite(PUMP_EN_PIN, LOW);

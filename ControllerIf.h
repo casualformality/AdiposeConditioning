@@ -31,12 +31,14 @@ class ErrorNode;
 #define VALVE_2_CLOSED  45
 #define VALVE_2_ADIPOSE 0
 #define VALVE_2_WASTE   180
+#define VALVE_2_FLUSH   90
 
-#define DEBUG_TIME 10000
+#define DEBUG_TIME 15000
 #define DEBUG_PIN 13
 
 enum DeviceState {
     MENU_STATE,
+    FLUSH_SLN,
     FILL_HYP,
     SHAKE_HYP,
     SETTLE_HYP,
@@ -52,6 +54,7 @@ enum ValvePos {
     CLOSED,
     HYP_OPEN,
     NORM_OPEN,
+    FLUSH,
     DRAIN
 };
 

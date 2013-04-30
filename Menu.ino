@@ -11,7 +11,6 @@ void setup() {
     delay(500);
   
     Serial.begin(9600);
-    Serial.println(sizeof(long));
     pinMode(BUTTON_UP_PIN, INPUT);
     pinMode(BUTTON_DN_PIN, INPUT);
     pinMode(BUTTON_LT_PIN, INPUT);
